@@ -53,17 +53,11 @@ class Input(QLineEdit):
         super().__init__()
         self.setFixedHeight(50)
         self.setStyleSheet("""
-            QLineEdit {
-                font-size: 20px;
-                font-family: Arial;
-                font-weight: bold;
-                background-color: #BCA37F;
-                border-radius: 10px;
-                color: #FFF;
-            }
-            QLineEdit:hover {
-                background-color: #9C825E
-            }
+            font-size: 20px;
+            font-family: Arial;
+            font-weight: bold;
+            border: 2px solid #000;
+            border-radius: 10px;
         """)
 
 class WelcomeWindow(QWidget):
@@ -191,7 +185,8 @@ class AddWindow(QWidget):
 
 class WordsWindow(QWidget):
     def __init__(self) -> None:
-        super().__init__()            
+        super().__init__()
+        self.core = Core()            
         self.setWindowTitle("List of words")
         self.setFixedSize(500, 700)
         self.setStyleSheet("""
@@ -266,13 +261,14 @@ class WordsWindow(QWidget):
 
         self.setLayout(self.v_box)
 
-        self.scroll_bar1 = self.uz_list.verticalScrollBar()
-        self.scroll_bar2 = self.en_list.verticalScrollBar()
+        self.scroll_bar1 = self.en_list.verticalScrollBar()
+        self.scroll_bar2 = self.uz_list.verticalScrollBar()
 
         self.scroll_bar1.valueChanged.connect(self.scrollBarValueChanged1)
         self.scroll_bar2.valueChanged.connect(self.scrollBarValueChanged2)
 
         self.show()
+        self.show_all_words()
 
         self.menu_btn.clicked.connect(self.menu)
         self.add_btn.clicked.connect(self.add)
@@ -294,13 +290,23 @@ class WordsWindow(QWidget):
         self.scroll_bar2 = self.uz_list.verticalScrollBar()
         self.scroll_bar2.setValue(value)
 
-    def scrollBarValueChanged1(self, value):
+    def scrollBarValueChanged2(self, value):
         self.scroll_bar1 = self.en_list.verticalScrollBar()
         self.scroll_bar1.setValue(value)
+
+    def show_all_words(self):
+        words = self.core.get_all_words()
+        for _ in range(100):
+            for word in words:
+                en = word.get('en')
+                uz = word.get('uz')
+                self.en_list.addItem(en)
+                self.uz_list.addItem(uz)
 
 class SearchWindow(QWidget):
     def __init__(self) -> None:
         super().__init__()
+        self.core = Core()
         self.setWindowTitle("Search words")
         self.setFixedSize(500, 700)
         self.setStyleSheet("""
@@ -311,17 +317,11 @@ class SearchWindow(QWidget):
         self.input.setPlaceholderText("Search Dictionary")
         self.input.setFixedSize(350, 50)
         self.input.setStyleSheet("""
-            QLineEdit {
-                font-size: 20px;
-                font-family: Arial;
-                font-weight: bold;
-                background-color: #BCA37F;
-                border-radius: 10px;
-                color: #FFF;
-            }
-            QLineEdit:hover {
-                background-color: #9C825E
-            }
+            font-size: 20px;
+            font-family: Arial;
+            font-weight: bold;
+            border: 2px solid #000;
+            border-radius: 10px;
         """)
         self.search_btn = Button("Search")
         self.result = QListWidget(self)
@@ -362,6 +362,7 @@ class SearchWindow(QWidget):
         self.menu_btn.clicked.connect(self.menu)
         self.add_btn.clicked.connect(self.add)
         self.list_btn.clicked.connect(self.words)
+        self.search_btn.clicked.connect(self.search)
 
     def menu(self):
         self.close()
@@ -374,6 +375,21 @@ class SearchWindow(QWidget):
     def words(self):
         self.close()
         self.win = WordsWindow()
+
+    def search(self):
+        search_word = self.input.text()
+        self.__clear()
+        if search_word:
+            words = self.core.get_word(search_word)
+            if words == 0:
+                self.result.addItem("Topilmadi")
+            else:
+                en, uz = words
+                self.result.addItem(f"{en} {uz}")
+
+    def __clear(self):
+        self.input.clear()
+        self.result.clear()
 
 app = QApplication([])
 welcome = WelcomeWindow()
