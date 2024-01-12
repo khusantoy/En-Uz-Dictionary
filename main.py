@@ -10,6 +10,8 @@ from PyQt5.QtWidgets import (
     QListWidget
 )
 
+from core import Core
+
 class MainButton(QPushButton):
     def __init__(self, text):
         super().__init__(text)
@@ -119,6 +121,7 @@ class AddWindow(QWidget):
     
     def __init__(self) -> None:
         super().__init__()
+        self.core = Core()
         self.setWindowTitle("Add new words")
         self.setFixedSize(500, 700)
         self.setStyleSheet("""
@@ -169,7 +172,10 @@ class AddWindow(QWidget):
         uz = self.uz_input.text()
         en = self.en_input.text()
 
-        print(uz, en)
+        if uz and en:
+            self.core.write_data({"en": en, "uz":uz})
+            self.uz_input.clear()
+            self.en_input.clear()
 
     def menu(self):
         self.close()
@@ -185,10 +191,7 @@ class AddWindow(QWidget):
 
 class WordsWindow(QWidget):
     def __init__(self) -> None:
-        super().__init__()
-        self.uz_word = ["1. Apple", "2. Banana", "3. Cherry"]
-        self.en_word = ["1. Olma", "2. Banan", "3. Gilos"]
-
+        super().__init__()            
         self.setWindowTitle("List of words")
         self.setFixedSize(500, 700)
         self.setStyleSheet("""
@@ -227,11 +230,15 @@ class WordsWindow(QWidget):
             border: 2px solid #113946;
         """)
 
-        for word in self.en_word:
-            self.en_list.addItem(word)
-
-        for word in self.uz_word:
-            self.uz_list.addItem(word) 
+        # self.file = open("words.txt", "r")
+        # self.words = self.file.readlines()
+        # self.count = 1
+        # for word in self.words:
+        #     word = word[:-1]
+        #     word = word.split(' ')
+        #     self.en_list.addItem(f'{self.count}.{word[0]}')
+        #     self.uz_list.addItem(f'{self.count}.{word[1]}')
+        #     self.count +=1 
 
         self.h_box1 = QHBoxLayout()
         self.h_box2 = QHBoxLayout()
@@ -259,6 +266,12 @@ class WordsWindow(QWidget):
 
         self.setLayout(self.v_box)
 
+        self.scroll_bar1 = self.uz_list.verticalScrollBar()
+        self.scroll_bar2 = self.en_list.verticalScrollBar()
+
+        self.scroll_bar1.valueChanged.connect(self.scrollBarValueChanged1)
+        self.scroll_bar2.valueChanged.connect(self.scrollBarValueChanged2)
+
         self.show()
 
         self.menu_btn.clicked.connect(self.menu)
@@ -276,6 +289,14 @@ class WordsWindow(QWidget):
     def search(self):
         self.close()
         self.win = SearchWindow()
+
+    def scrollBarValueChanged1(self, value):
+        self.scroll_bar2 = self.uz_list.verticalScrollBar()
+        self.scroll_bar2.setValue(value)
+
+    def scrollBarValueChanged1(self, value):
+        self.scroll_bar1 = self.en_list.verticalScrollBar()
+        self.scroll_bar1.setValue(value)
 
 class SearchWindow(QWidget):
     def __init__(self) -> None:
