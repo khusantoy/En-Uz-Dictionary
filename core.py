@@ -26,6 +26,3 @@ class Core:
             if word == en or word == uz:
                 return en, uz
         return 0
-
-core = Core()
-core.get_word("da")

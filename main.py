@@ -163,8 +163,8 @@ class AddWindow(QWidget):
         self.add_btn.clicked.connect(self.add_word)
 
     def add_word(self):
-        uz = self.uz_input.text()
-        en = self.en_input.text()
+        uz = self.uz_input.text().lower()
+        en = self.en_input.text().lower()
 
         if uz and en:
             self.core.write_data({"en": en, "uz":uz})
@@ -213,7 +213,6 @@ class WordsWindow(QWidget):
             font-size: 18px;
             font-family: Arial;
             background-color: #EAD7BB;
-            border-radius: 10px;
             border: 2px solid #113946;
         """)
         self.uz_list = QListWidget(self)
@@ -221,7 +220,6 @@ class WordsWindow(QWidget):
             font-size: 18px;
             font-family: Arial;
             background-color: #EAD7BB;
-            border-radius: 10px;
             border: 2px solid #113946;
         """)
 
@@ -296,12 +294,11 @@ class WordsWindow(QWidget):
 
     def show_all_words(self):
         words = self.core.get_all_words()
-        for _ in range(100):
-            for word in words:
-                en = word.get('en')
-                uz = word.get('uz')
-                self.en_list.addItem(en)
-                self.uz_list.addItem(uz)
+        for word in words:
+            en = word.get('en').capitalize()
+            uz = word.get('uz').capitalize()
+            self.en_list.addItem(en)
+            self.uz_list.addItem(uz)
 
 class SearchWindow(QWidget):
     def __init__(self) -> None:
@@ -377,7 +374,8 @@ class SearchWindow(QWidget):
         self.win = WordsWindow()
 
     def search(self):
-        search_word = self.input.text()
+        search_word = self.input.text().lower()
+        print(search_word)
         self.__clear()
         if search_word:
             words = self.core.get_word(search_word)
