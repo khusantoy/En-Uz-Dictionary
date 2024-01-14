@@ -1,3 +1,5 @@
+import os.path
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import (
     QApplication,
@@ -236,6 +238,7 @@ class WordsWindow(QWidget):
         self.h_box1 = QHBoxLayout()
         self.h_box2 = QHBoxLayout()
         self.h_box3 = QHBoxLayout()
+        self.h_box4 = QHBoxLayout()
 
         self.v_box = QVBoxLayout()
 
@@ -245,6 +248,24 @@ class WordsWindow(QWidget):
         self.h_box2.addWidget(self.en_list) 
         self.h_box2.addWidget(self.uz_list)
 
+        self.delete_btn = QPushButton(self)
+        self.delete_btn.setText("Delete")
+        self.delete_btn.setFixedHeight(50)
+        self.delete_btn.setStyleSheet("""
+            QPushButton {
+                font-size: 20px;
+                font-family: Arial;
+                font-weight: bold;
+                color: #fff;
+                background-color: #DC3545;
+                border-radius: 10px;
+            }           
+            QPushButton:hover {
+                background-color: #EC586F;
+            }
+        """)
+        
+
         self.menu_btn = Button("Menu")
         self.add_btn = Button("Add New Word")
         self.search_btn = Button("Search")
@@ -252,9 +273,11 @@ class WordsWindow(QWidget):
         self.h_box3.addWidget(self.menu_btn)
         self.h_box3.addWidget(self.add_btn)
         self.h_box3.addWidget(self.search_btn)
+        self.h_box4.addWidget(self.delete_btn)
 
         self.v_box.addLayout(self.h_box1)
         self.v_box.addLayout(self.h_box2)
+        self.v_box.addLayout(self.h_box4)
         self.v_box.addLayout(self.h_box3)
 
         self.setLayout(self.v_box)
@@ -271,6 +294,26 @@ class WordsWindow(QWidget):
         self.menu_btn.clicked.connect(self.menu)
         self.add_btn.clicked.connect(self.add)
         self.search_btn.clicked.connect(self.search)
+        self.delete_btn.clicked.connect(self.delete_word)
+
+    def delete_word(self):
+        def is_file_empty(file_path):
+            return os.path.getsize(file_path) == 0
+
+        file_path = 'words.txt'
+
+        if is_file_empty(file_path):
+            print("Deletion error")
+        else:
+            self.index = self.en_list.currentRow()
+            with open('words.txt', 'r') as f:
+                lines = f.readlines()
+                lines.pop(self.index)
+
+            with open('words.txt', 'w') as f:
+                f.writelines(lines)
+            self.close()
+            self.win = WordsWindow()
 
     def menu(self):
         self.close()
